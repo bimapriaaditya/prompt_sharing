@@ -5,19 +5,20 @@ import { useState, useEffect } from "react";
 import { signIn, signOut, useSession, getProviders } from 'next-auth/react';
 
 const Nav = () => {
-  const isUserLogIn = true;
+  const { data: session } = useSession()
+
   const [providers, setProviders] = useState(null);
   const [toggleDropdown, setToggleDropdown] = useState(false);
   
-  // useEffect(() => {
-  //   const setProviders = async () => {
-  //     const response = await getProviders();
+  useEffect(() => {
+    const setUpProviders = async () => {
+      const response = await getProviders();
 
-  //     setProviders(response);
-  //   }
+      setProviders(response);
+    }
 
-  //   setProviders();
-  // }, []);
+    setUpProviders();
+  }, []);
 
   return (
     <nav className="w-full flex-between mb-16 py-3">
@@ -36,7 +37,7 @@ const Nav = () => {
       {/* Desktop View  */}
       <div className="sm:flex hidden">
         {
-          isUserLogIn ? (
+          session?.user ? (
             <div className="flex gap-3 md:gap-5">
               <Link 
                 href='/create-prompt' 
@@ -82,7 +83,7 @@ const Nav = () => {
       {/* Mobile View */}
       <div className="sm:hidden flex relative">
         {
-          isUserLogIn  ? (
+          session?.user ? (
             <div className="flex">
               <Image 
                 src="/assets/images/logo.svg"
@@ -125,7 +126,21 @@ const Nav = () => {
               }
             </div>
           ) : (
-            <></>
+            <>
+              {
+                providers &&
+                Object.values(providers).map((provider) => (
+                  <button
+                    type="button"
+                    key={provider.name}
+                    onClick={() => {signIn(provider.id)}}
+                    className="black_btn"
+                  >
+                    Sign In
+                  </button>
+                ))
+              }
+            </>
           )
         }
       </div>
